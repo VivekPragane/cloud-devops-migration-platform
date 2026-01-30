@@ -6,9 +6,9 @@ on:
 
 env:
   AWS_REGION: ap-south-1
-  ECR_REPOSITORY: electromart-backend
-  ECS_CLUSTER: sparknet-ecs-cluster
-  ECS_SERVICE: sparknet-backend-service
+  ECR_REPOSITORY: sparknet-dev-backend
+  ECS_CLUSTER: sparknet-dev-cluster
+  ECS_SERVICE: sparknet-dev-service
   CONTAINER_NAME: backend
 
 jobs:
