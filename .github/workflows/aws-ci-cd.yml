@@ -8,7 +8,7 @@ env:
   AWS_REGION: ap-south-1
   ECR_REPOSITORY: sparknet-dev-backend
   ECS_CLUSTER: sparknet-dev-cluster
-  ECS_SERVICE: sparknet-dev-service
+  ECS_SERVICE: sparknet--service
   CONTAINER_NAME: backend
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # 4. Build Docker image
+          # 4. Build Docker image
       - name: Build Docker image
         run: |
           docker build \
@@ -45,7 +45,7 @@ jobs:
         run: |
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
 
-      # 6. Deploy to ECS (force new deployment)
+      # 6. Deploy to Amazon ECS
       - name: Deploy to Amazon ECS
         run: |
           aws ecs update-service \
