@@ -1,3 +1,5 @@
+# Legacy Azure CI/CD pipeline (archived during AWS migration - Phase 4)
+
 name: DevOps Pipeline
 
 on:
