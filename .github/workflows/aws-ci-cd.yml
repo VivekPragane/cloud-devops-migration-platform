@@ -34,11 +34,12 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
           # 4. Build Docker image
+            # 4. Build Docker image
       - name: Build Docker image
         run: |
           docker build \
             -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest \
-            -f docker/Dockerfile.backend .
+            -f app/backend/Dockerfile app/backend
 
       # 5. Push image to ECR
       - name: Push Docker image to ECR
