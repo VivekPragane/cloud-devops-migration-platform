@@ -1,115 +1,181 @@
 # Product Requirements Document (PRD)
-
-## 1. Purpose
-
-The purpose of this document is to define the functional and non-functional requirements
-for the DevOps migration project. This document outlines what the system is expected to do,
-how it should behave in a production environment, and the constraints under which it must
-operate.
-
-The PRD serves as a reference point to ensure that implementation, infrastructure design,
-and automation decisions remain aligned with the overall project goals.
+## Cloud DevOps Migration Platform
 
 ---
 
-## 2. Scope of the Project
+## 1. Purpose
 
-This project focuses on improving an existing application by:
+The purpose of this document is to define the **functional, non-functional, and operational requirements** for the Cloud DevOps Migration Platform developed as part of the Sparknet DevOps Internship Project.
 
-- Fixing configuration and architectural issues in the current setup
-- Containerizing the backend and frontend using Docker
-- Migrating the infrastructure from Azure to AWS
+This PRD ensures that:
+- Infrastructure, automation, and deployment decisions remain aligned with project goals
+- The system reflects **real-world DevOps practices**, not tutorial deployments
+- All engineering decisions are **traceable, defensible, and reproducible**
+
+This document serves as a single source of truth for implementation, validation, and evaluation.
+
+---
+
+## 2. Project Scope
+
+The project focuses on **stabilizing, migrating, and operating** an intentionally misconfigured application by applying production-grade DevOps practices.
+
+### In Scope
+
+- Identifying and fixing configuration, runtime, and infrastructure issues
+- Containerizing backend and frontend workloads using Docker
+- Migrating infrastructure from Azure-oriented design to AWS-native services
+- Implementing Infrastructure as Code using Terraform
 - Automating build and deployment using CI/CD pipelines
-- Applying DevOps best practices related to security, monitoring, and maintainability
+- Applying security, observability, and cost-control best practices
+- Validating deployments with logs, metrics, and evidence
+- Responsible infrastructure teardown after validation
 
-The scope of this project does not include adding new application features or modifying
-business logic beyond what is required for stability and deployment.
+### Out of Scope (Intentional)
+
+- Adding new business features
+- Refactoring application business logic
+- Performance tuning at application code level
+- High-availability or enterprise-scale optimizations beyond Free Tier constraints
 
 ---
 
 ## 3. Functional Requirements
 
-The system must satisfy the following functional requirements:
+### 3.1 Backend Requirements
 
-### Backend Requirements
-- The backend service must start successfully using environment-based configuration
-- A health check endpoint must be exposed for monitoring and orchestration
-- The service must handle errors gracefully and return meaningful responses
-- The backend must be deployable as a containerized application
+- The backend service **must start using environment-based configuration**
+- Missing or invalid configuration must result in **explicit, fail-fast errors**
+- A `/health` endpoint must be exposed and remain independent of database availability
+- Backend must be packaged as a Docker image suitable for ECS deployment
+- Logs must clearly indicate startup state, failures, and dependency status
 
-### Frontend Requirements
-- The frontend application must be able to communicate with the backend using a configurable API endpoint
-- Environment-specific configuration must be supported without code changes
-- The frontend must be containerized and deployable alongside the backend
+---
 
-### CI/CD Requirements
-- The CI/CD pipeline must automatically build Docker images
-- The pipeline must validate builds before deployment
-- The pipeline must deploy the application to AWS in an automated manner
-- Failures in the pipeline must be visible and traceable
+### 3.2 Frontend Requirements
+
+- The frontend must communicate with the backend via a configurable API endpoint
+- Environment-specific configuration must be injectable at build time
+- The frontend must support static hosting
+- Client-side routing must work correctly in production (SPA behavior)
+- The frontend must be deployable independently from the backend
+
+---
+
+### 3.3 Infrastructure Requirements
+
+- All infrastructure must be provisioned using **Terraform only**
+- Infrastructure must include:
+  - VPC and networking
+  - Application Load Balancer
+  - ECS cluster and services
+  - IAM roles with least privilege
+  - CloudWatch logging
+- Infrastructure must be **reproducible and destroyable**
+- No manual AWS Console changes are allowed
+
+---
+
+### 3.4 CI/CD Requirements
+
+- CI/CD pipeline must:
+  - Build Docker images
+  - Push images to a container registry
+  - Trigger ECS deployments automatically
+- CI/CD must not perform Terraform applies
+- Failures must be visible, logged, and traceable
+- Deployments must use immutable image versions
 
 ---
 
 ## 4. Non-Functional Requirements
 
-The system must also meet the following non-functional requirements:
+### 4.1 Reliability & Stability
 
-### Performance and Reliability
-- The application must remain stable during deployments
-- Services must recover automatically from failures where possible
-- Container health checks must be used to monitor service availability
-
-### Security
-- Sensitive configuration values must not be hardcoded
-- Secrets must be managed using environment variables or secure services
-- Containers must follow least-privilege and minimal image principles
-
-### Maintainability
-- Infrastructure must be managed as code using Terraform
-- Terraform code must be readable and modular
-- Documentation must clearly explain architecture and decisions
-
-### Portability
-- The application must be cloud-portable with minimal changes
-- Infrastructure design should avoid unnecessary vendor lock-in
-- Environment-specific behavior must be configurable
+- Application deployments must not corrupt infrastructure
+- Services must fail clearly and predictably on misconfiguration
+- ECS health checks must accurately reflect service availability
 
 ---
 
-## 5. Constraints and Assumptions
+### 4.2 Security
 
-- AWS Free Tier services must be used wherever possible
-- The existing application structure must be respected unless changes are required for stability
-- All changes must align with DevOps best practices
-- The solution must be understandable and reproducible by another engineer
+- No secrets may be hardcoded in source code or images
+- Runtime secrets must be injected securely
+- IAM roles must follow the principle of least privilege
+- CI/CD credentials must be scoped and isolated
+
+---
+
+### 4.3 Observability
+
+- Application and infrastructure logs must be available in CloudWatch
+- Runtime failures must be diagnosable without SSH access
+- Logs must be sufficient to distinguish:
+  - Infrastructure failures
+  - Application failures
+  - Configuration errors
+
+---
+
+### 4.4 Cost Awareness
+
+- AWS Free Tier usage must be prioritized
+- Compute resources must be scalable to zero when idle
+- Infrastructure must be torn down after validation
+- Cost control must be treated as an engineering responsibility
+
+---
+
+### 4.5 Maintainability
+
+- Terraform code must be modular and readable
+- Repository structure must be intuitive and documented
+- Another engineer must be able to reproduce the setup using documentation alone
+
+---
+
+## 5. Constraints & Assumptions
+
+- AWS Free Tier and low-cost services only
+- Single AWS region deployment
+- MongoDB provided via managed external service (Atlas)
+- Project prioritizes **engineering reasoning over uptime**
+- Documentation quality is a core deliverable
 
 ---
 
 ## 6. Acceptance Criteria
 
-The project will be considered successful when:
+The project is considered successful when:
 
-- The application is deployed and accessible on AWS
-- Backend and frontend services run successfully in containers
-- Infrastructure can be created and destroyed using Terraform
-- CI/CD pipelines complete successfully without manual intervention
-- Documentation accurately reflects the final implementation
+- Backend and frontend are deployed successfully on AWS
+- Infrastructure can be provisioned and destroyed using Terraform
+- CI/CD pipeline executes end-to-end without manual steps
+- Runtime failures are observable and diagnosable
+- Cost exposure is minimized after validation
+- Documentation accurately reflects the final system
 
 ---
 
-## 7. Out of Scope
+## 7. Explicitly Out of Scope
 
-The following items are explicitly out of scope:
-
-- Adding new product features
-- Redesigning the application UI
-- Optimizing application-level business logic
-- Introducing additional third-party services beyond the required stack
+- Enterprise-grade HA or DR setups
+- Multi-region deployments
+- Paid AWS services beyond Free Tier
+- Feature development or UI redesign
+- Long-running production workloads
 
 ---
 
 ## 8. Summary
 
-This PRD defines the expectations and boundaries of the DevOps migration project.
-By focusing on stability, automation, and best practices, the project aims to
-demonstrate a production-ready approach to cloud migration and DevOps engineering.
+This PRD defines a **realistic, production-aligned DevOps migration project**.
+
+The emphasis is not on feature delivery, but on:
+- Debugging real failures
+- Applying DevOps best practices
+- Making informed architectural trade-offs
+- Operating cloud infrastructure responsibly
+
+
